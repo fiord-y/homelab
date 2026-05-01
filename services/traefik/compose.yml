@@ -8,7 +8,7 @@ services:
       - TZ=${TZ}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ${BASE_DIR}/config/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./config/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
       - ${DATA_DIR}/traefik:/var/lib/traefik
     labels:
       - traefik.enable=true
