@@ -1,0 +1,16 @@
+services:
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    restart: unless-stopped
+    environment:
+      - LOG_LEVEL=info
+      - TZ=${TZ}
+    volumes:
+      - ${DATA_DIR}/jellyseerr/config:/app/config
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.jellyseerr.rule=Host(`${JELLYSEERR_HOST}`)
+      - traefik.http.routers.jellyseerr.entrypoints=websecure
+      - traefik.http.routers.jellyseerr.tls.certresolver=tailscale
+      - traefik.http.routers.jellyseerr.middlewares=${TRAEFIK_AUTH_MIDDLEWARE}
+      - traefik.http.services.jellyseerr.loadbalancer.server.port=5055
