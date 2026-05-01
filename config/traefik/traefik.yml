@@ -1,0 +1,20 @@
+api:
+  dashboard: true
+  insecure: false
+
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+
+providers:
+  docker:
+    exposedByDefault: false
+
+certificatesResolvers:
+  tailscale:
+    tailscale: {}
+
+log:
+  level: ${TRAEFIK_LOG_LEVEL}

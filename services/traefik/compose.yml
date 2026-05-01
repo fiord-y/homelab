@@ -1,0 +1,19 @@
+services:
+  traefik:
+    image: traefik:v3.1
+    container_name: traefik
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${BASE_DIR}/config/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ${DATA_DIR}/traefik:/var/lib/traefik
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.traefik.rule=Host(`${TRAEFIK_DASHBOARD_HOST}`)
+      - traefik.http.routers.traefik.entrypoints=websecure
+      - traefik.http.routers.traefik.tls.certresolver=tailscale
+      - traefik.http.routers.traefik.service=api@internal
+      - traefik.http.routers.traefik.middlewares=${TRAEFIK_AUTH_MIDDLEWARE}
