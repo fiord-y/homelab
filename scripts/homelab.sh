@@ -74,6 +74,9 @@ bootstrap() {
   sed -i "s/AUTHENTIK_BOOTSTRAP_TOKEN=change_me/AUTHENTIK_BOOTSTRAP_TOKEN=$(openssl rand -hex 24)/" "$ENV_FILE"
   sed -i "s/NEXTCLOUD_DB_PASSWORD=change_me/NEXTCLOUD_DB_PASSWORD=$(openssl rand -hex 24)/" "$ENV_FILE"
   sed -i "s/NEXTCLOUD_ADMIN_PASSWORD=change_me/NEXTCLOUD_ADMIN_PASSWORD=$(openssl rand -hex 16)/" "$ENV_FILE"
+  if ! grep -q '^DOCKER_API_VERSION=' "$ENV_FILE"; then
+    echo 'DOCKER_API_VERSION=1.41' >> "$ENV_FILE"
+  fi
   mkdir -p "$ROOT_DIR/data"
   echo "Bootstrap complete: $ENV_FILE"
 }
