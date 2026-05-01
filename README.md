@@ -54,9 +54,10 @@ Production-oriented, modular homelab layout for a single Fedora host using Docke
 
 ## Important notes
 - Default `.env` uses placeholders and generated secrets at bootstrap.
-- Hard reset removes **all containers/volumes in this project** and deletes `./data`.
+- Hard reset removes **all containers/volumes in this project** and deletes the directory pointed by `DATA_DIR` in `.env`.
 - Create Authentik applications/providers and map policies/groups to users you share Tailnet with.
 
 
 ## Path notes
 - Paths are relative to the repository root by default (`DATA_DIR=./data`) so they work on any host without editing hardcoded absolute paths.
+- The manager uses Compose `--project-directory` pinned to repo root, so relative paths like `./data` and `./config` are always resolved from this repository root.

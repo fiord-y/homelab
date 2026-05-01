@@ -27,7 +27,7 @@ compose_files() {
 dc() {
   require_env
   # shellcheck disable=SC2086
-  docker compose --env-file "$ENV_FILE" $(compose_files) "$@"
+  docker compose --project-directory "$ROOT_DIR" --env-file "$ENV_FILE" $(compose_files) "$@"
 }
 
 validate() {
@@ -41,7 +41,7 @@ validate() {
 
   if [[ -f "$ENV_FILE" ]]; then
     # shellcheck disable=SC2086
-    docker compose --env-file "$ENV_FILE" $(compose_files) config >/dev/null || ok=1
+    docker compose --project-directory "$ROOT_DIR" --env-file "$ENV_FILE" $(compose_files) config >/dev/null || ok=1
   else
     echo ".env missing (run bootstrap first)."
     ok=1
@@ -109,10 +109,17 @@ case "${1:-}" in
   logs) dc logs -f --tail=200 ;;
   pull) dc pull ;;
   reset-hard)
-    read -r -p "This deletes all containers and all data under ./data. Continue? [y/N] " ok
+    require_env
+    # shellcheck disable=SC1090
+    source "$ENV_FILE"
+    target_data_dir="${DATA_DIR:-$ROOT_DIR/data}"
+    [[ "$target_data_dir" = /* ]] || target_data_dir="$ROOT_DIR/${target_data_dir#./}"
+    read -r -p "This deletes all containers and all data under $target_data_dir. Continue? [y/N] " ok
     [[ "$ok" =~ ^[Yy]$ ]] || exit 0
     dc down -v --remove-orphans || true
-    rm -rf "$ROOT_DIR/data"
+    if [[ -n "$target_data_dir" && "$target_data_dir" != "/" ]]; then
+      rm -rf "$target_data_dir"
+    fi
     echo "Hard reset complete."
     ;;
   add-service) shift; add_service "$@" ;;
