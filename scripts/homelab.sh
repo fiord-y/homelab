@@ -27,7 +27,7 @@ compose_files() {
 dc() {
   require_env
   # shellcheck disable=SC2086
-  docker compose --project-directory "$ROOT_DIR" --env-file "$ENV_FILE" $(compose_files) "$@"
+  env -u DOCKER_API_VERSION docker compose --project-directory "$ROOT_DIR" --env-file "$ENV_FILE" $(compose_files) "$@"
 }
 
 validate() {
@@ -36,12 +36,15 @@ validate() {
   docker compose version >/dev/null 2>&1 || { echo "Missing Docker Compose plugin"; ok=1; }
   require_cmd tailscale || ok=1
   require_cmd openssl || ok=1
+  if [[ -n "${DOCKER_API_VERSION:-}" ]]; then
+    echo "Host shell DOCKER_API_VERSION is set to ${DOCKER_API_VERSION}; script will ignore it to prevent bad compose interpolation."
+  fi
   [[ -S /var/run/docker.sock ]] || { echo "Docker socket not found at /var/run/docker.sock"; ok=1; }
   tailscale status >/dev/null 2>&1 || { echo "Tailscale is not connected. Run: sudo tailscale up"; ok=1; }
 
   if [[ -f "$ENV_FILE" ]]; then
     # shellcheck disable=SC2086
-    docker compose --project-directory "$ROOT_DIR" --env-file "$ENV_FILE" $(compose_files) config >/dev/null || ok=1
+    env -u DOCKER_API_VERSION docker compose --project-directory "$ROOT_DIR" --env-file "$ENV_FILE" $(compose_files) config >/dev/null || ok=1
   else
     echo ".env missing (run bootstrap first)."
     ok=1
